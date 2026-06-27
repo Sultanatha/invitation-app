@@ -1,123 +1,173 @@
-# Invitation App — Laravel 12 (API + Admin Dashboard + RBAC)
+# 💌 Invitation App
 
-Source code ini adalah **kumpulan file tambahan** untuk di-_drop_ ke project Laravel 12 baru.
-(Bukan project penuh, karena environment ini tidak punya akses ke Packagist/Composer registry —
-jadi instalasi composer harus dilakukan di komputer/server kamu sendiri.)
+Aplikasi undangan digital berbasis web yang dibangun dengan **Laravel 12**, dilengkapi **Admin Dashboard**, **REST API publik**, dan sistem **RBAC** menggunakan Spatie Laravel Permission.
 
-## Struktur fitur
+---
 
-- **Admin Dashboard** (Blade + Tailwind via CDN) di `/admin`
-  - Hero Section, Mempelai, Jadwal Acara, Cerita Cinta, Galeri, Hadiah, RSVP, Settings
-  - Manajemen User & Role (RBAC) — hanya bisa diakses role yang punya permission `view-user` / `view-role` (default: `super-admin`)
-- **REST API publik** di `/api/v1/*` untuk dikonsumsi landing page undangan (HTML statis, Vue, React, dll)
-- **RBAC** menggunakan **Spatie laravel-permission**, role default: `super-admin` (akses semua) dan `admin` (akses konten, tanpa kelola user/role)
+## 🚀 Fitur Utama
 
-## Langkah Instalasi
+- **Admin Dashboard** (Blade + Tailwind CSS) di `/admin`
+  - Manajemen Hero Section, Mempelai, Jadwal Acara, Cerita Cinta, Galeri, Hadiah, RSVP, dan Settings
+  - Manajemen User & Role berbasis RBAC
+- **REST API Publik** di `/api/v1/*` untuk dikonsumsi landing page (HTML statis, Vue, React, dll)
+- **RBAC** dengan Spatie Laravel Permission — role default: `super-admin` & `admin`
+- **Dokumentasi API interaktif** via Scalar di `/scalar`
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Teknologi |
+|---|---|
+| Backend | Laravel 12 |
+| Database | PostgreSQL |
+| Auth & API | Laravel Sanctum |
+| RBAC | Spatie Laravel Permission |
+| Frontend (Admin) | Blade + Tailwind CSS (CDN) |
+| API Docs | Scalar / OpenAPI |
+
+---
+
+## ⚙️ Instalasi
+
+### Prasyarat
+
+- PHP >= 8.2
+- Composer
+- PostgreSQL
+- Node.js & NPM (opsional, untuk build asset)
+
+### Langkah-langkah
 
 ```bash
-# 1. Buat project Laravel 12 baru
-composer create-project laravel/laravel invitation-app
+# 1. Clone repository
+git clone https://github.com/Sultanatha/invitation-app.git
 cd invitation-app
 
-# 2. Install Spatie Permission & Sanctum
-composer require spatie/laravel-permission
-composer require laravel/sanctum
+# 2. Install dependency PHP
+composer install
 
-# 3. Copy semua file dari paket ini ke project (timpa file yang sama)
-#    - app/Models/*
-#    - app/Http/Controllers/*
-#    - database/migrations/*
-#    - database/seeders/*
-#    - routes/web.php & routes/api.php
-#    - bootstrap/app.php
-#    - resources/views/admin/*
-#    - config/permission.php
+# 3. Salin file environment
+cp .env.example .env
 
-# 4. Publish migration Spatie (jika belum ada) lalu migrate
+# 4. Generate application key
+php artisan key:generate
+```
+
+### Konfigurasi Database (PostgreSQL)
+
+Edit file `.env` dan sesuaikan konfigurasi berikut:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=invitation_app
+DB_USERNAME=your_db_username
+DB_PASSWORD=your_db_password
+```
+
+### Lanjutan Setup
+
+```bash
+# 5. Publish migration Spatie Permission
 php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+
+# 6. Jalankan migration
 php artisan migrate
 
-# 5. Seed role, permission, dan user super-admin default
+# 7. Seed role, permission, dan user default
 php artisan db:seed --class=RolePermissionSeeder
 
-# 6. Link storage (untuk upload foto/gambar)
+# 8. Link storage untuk upload gambar
 php artisan storage:link
 
-# 7. Jalankan
+# 9. Jalankan server lokal
 php artisan serve
 ```
 
-## Login Dashboard Default
+---
 
-```
-URL    : http://localhost:8000/admin/login
-Email  : admin@invitation.test
-Password: password
-```
+## 🔐 Login Default
 
-**Ganti password ini setelah login pertama kali**, lewat menu Manajemen User.
+| Field | Value |
+|---|---|
+| URL | `http://localhost:8000/admin/login` |
+| Email | `admin@invitation.test` |
+| Password | `password` |
 
-## Endpoint API Utama (Public)
+> ⚠️ **Ganti password setelah login pertama kali** melalui menu Manajemen User.
 
-Dokumentasi interaktif API tersedia via Scalar:
+---
 
-```
-http://localhost:8000/scalar
-```
+## 📡 Endpoint API
 
-OpenAPI spec mentah tersedia di:
-
-```
-http://localhost:8000/openapi.yaml
-```
+Dokumentasi interaktif tersedia di: `http://localhost:8000/scalar`  
+OpenAPI spec: `http://localhost:8000/openapi.yaml`
 
 | Method | Endpoint | Keterangan |
 |---|---|---|
-| GET | `/api/v1/invitation` | Semua data landing page sekali fetch (hero, couples, events, love stories, gallery, gifts, settings) |
+| GET | `/api/v1/invitation` | Semua data landing page (hero, couples, events, dll) |
 | GET | `/api/v1/invitation/hero` | Data hero section aktif |
 | GET | `/api/v1/invitation/couples` | Data mempelai |
 | GET | `/api/v1/invitation/events` | Jadwal acara |
 | GET | `/api/v1/invitation/love-stories` | Cerita cinta |
 | GET | `/api/v1/invitation/galleries` | Galeri foto |
-| GET | `/api/v1/invitation/gifts` | Info rekening/hadiah |
-| POST | `/api/v1/rsvp` | Tamu mengisi RSVP |
+| GET | `/api/v1/invitation/gifts` | Info rekening / hadiah |
+| POST | `/api/v1/rsvp` | Submit RSVP tamu |
 
-Contoh response `/api/v1/invitation`:
-```json
-{
-  "success": true,
-  "data": {
-    "settings": { "site_title": "...", "theme_color": "#000000" },
-    "hero": { "groom_name": "...", "bride_name": "...", "event_date": "2026-08-10" },
-    "couples": [...],
-    "events": [...],
-    "love_stories": [...],
-    "galleries": [...],
-    "gifts": [...]
-  }
-}
-```
+**Contoh submit RSVP:**
 
-Contoh submit RSVP:
 ```bash
 curl -X POST http://localhost:8000/api/v1/rsvp \
   -H "Content-Type: application/json" \
   -d '{"guest_name":"Budi","attendance":"hadir","total_guest":2,"message":"Selamat ya!"}'
 ```
 
-## Struktur RBAC
+---
 
-Permission dibuat otomatis per modul dengan format `{action}-{module}`, contoh:
-`view-hero`, `create-hero`, `update-hero`, `delete-hero`, dst, untuk modul:
-`dashboard, hero, couple, event, love-story, gallery, gift, rsvp, setting, user, role`.
+## 👥 Struktur RBAC
 
-- **super-admin** → semua permission
-- **admin** → semua permission konten, TANPA `user` & `role`
+Permission dibuat otomatis per modul dengan format `{action}-{module}`.
 
-Kamu bisa menambah role baru lewat dashboard (`/admin/roles`) dan mencentang permission yang diinginkan — ini akan otomatis membatasi menu sidebar & akses controller (lewat middleware `permission:` dan `@can` di Blade).
+| Role | Akses |
+|---|---|
+| `super-admin` | Semua permission (termasuk user & role) |
+| `admin` | Semua konten, **tanpa** akses user & role |
 
-## Catatan
+**Modul yang tersedia:** `dashboard`, `hero`, `couple`, `event`, `love-story`, `gallery`, `gift`, `rsvp`, `setting`, `user`, `role`
 
-- Semua upload gambar disimpan di `storage/app/public` — jangan lupa `php artisan storage:link`.
-- Untuk produksi: ganti Tailwind CDN dengan build asset (Vite) dan tambahkan rate-limiting pada endpoint `POST /api/v1/rsvp` agar tidak disalahgunakan (spam submit).
-- Jika landing page dibuat terpisah (SPA/React/Vue), cukup fetch endpoint API di atas — tidak perlu autentikasi karena bersifat publik (read-only, kecuali RSVP).
+Role baru dapat dibuat lewat dashboard di `/admin/roles`.
+
+---
+
+## 📁 Struktur Direktori Utama
+
+```
+invitation-app/
+├── app/
+│   ├── Http/Controllers/     # Controller API & Admin
+│   └── Models/               # Eloquent Models
+├── database/
+│   ├── migrations/           # Migrasi database
+│   └── seeders/              # Seeder role & permission
+├── resources/views/admin/    # Blade views dashboard
+├── routes/
+│   ├── api.php               # Route API publik
+│   └── web.php               # Route admin & web
+└── storage/app/public/       # Upload gambar
+```
+
+---
+
+## 📝 Catatan Penting
+
+- Semua upload gambar disimpan di `storage/app/public` — pastikan sudah menjalankan `php artisan storage:link`.
+- Untuk **produksi**: ganti Tailwind CDN dengan build asset via Vite, dan tambahkan rate-limiting pada endpoint `POST /api/v1/rsvp`.
+- Jika landing page dibuat terpisah (React/Vue/SPA), cukup consume endpoint API — tidak perlu autentikasi karena bersifat publik (read-only, kecuali RSVP).
+
+---
+
+## 📄 Lisensi
+
+Proyek ini bersifat privat. Seluruh hak cipta dipegang oleh pemilik repository.
