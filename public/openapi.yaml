@@ -1,0 +1,574 @@
+openapi: 3.1.0
+info:
+  title: Invitation App API
+  version: 1.0.0
+  description: Public API for invitation landing page data and RSVP submissions.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: /api/v1
+    description: Current application
+security: []
+tags:
+  - name: Invitation
+    description: Public invitation content
+  - name: RSVP
+    description: RSVP submission and management
+paths:
+  /invitation:
+    get:
+      tags:
+        - Invitation
+      summary: Get complete invitation data
+      operationId: getInvitation
+      responses:
+        "200":
+          description: Complete invitation payload.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationResponse"
+  /invitation/hero:
+    get:
+      tags:
+        - Invitation
+      summary: Get active hero section
+      operationId: getInvitationHero
+      responses:
+        "200":
+          description: Active hero section.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        anyOf:
+                          - $ref: "#/components/schemas/HeroSection"
+                          - type: "null"
+  /invitation/couples:
+    get:
+      tags:
+        - Invitation
+      summary: Get couple profiles
+      operationId: getInvitationCouples
+      responses:
+        "200":
+          description: Couple profile list.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Couple"
+  /invitation/events:
+    get:
+      tags:
+        - Invitation
+      summary: Get event schedules
+      operationId: getInvitationEvents
+      responses:
+        "200":
+          description: Ordered event schedules.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/EventSchedule"
+  /invitation/love-stories:
+    get:
+      tags:
+        - Invitation
+      summary: Get love stories
+      operationId: getInvitationLoveStories
+      responses:
+        "200":
+          description: Ordered love story list.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/LoveStory"
+  /invitation/galleries:
+    get:
+      tags:
+        - Invitation
+      summary: Get gallery images
+      operationId: getInvitationGalleries
+      responses:
+        "200":
+          description: Ordered gallery list.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Gallery"
+  /invitation/gifts:
+    get:
+      tags:
+        - Invitation
+      summary: Get gift options
+      operationId: getInvitationGifts
+      responses:
+        "200":
+          description: Gift option list.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Gift"
+  /rsvp:
+    post:
+      tags:
+        - RSVP
+      summary: Submit RSVP
+      operationId: createRsvp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RsvpRequest"
+            example:
+              guest_name: Budi Santoso
+              attendance: hadir
+              total_guest: 2
+              message: Selamat, semoga lancar sampai hari H.
+      responses:
+        "201":
+          description: RSVP submitted.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Terima kasih telah mengisi RSVP.
+                      data:
+                        $ref: "#/components/schemas/Rsvp"
+        "422":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+    get:
+      tags:
+        - RSVP
+      summary: List RSVP submissions
+      operationId: listRsvp
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Paginated RSVP list.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/RsvpPaginator"
+        "401":
+          description: Unauthenticated.
+        "403":
+          description: Missing permission to view RSVP data.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum token
+  schemas:
+    SuccessResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+    InvitationResponse:
+      allOf:
+        - $ref: "#/components/schemas/SuccessResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                settings:
+                  $ref: "#/components/schemas/Settings"
+                hero:
+                  anyOf:
+                    - $ref: "#/components/schemas/HeroSection"
+                    - type: "null"
+                couples:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Couple"
+                events:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/EventSchedule"
+                love_stories:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/LoveStory"
+                galleries:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Gallery"
+                gifts:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Gift"
+    Settings:
+      type: object
+      properties:
+        site_title:
+          type: string
+          example: Undangan Pernikahan
+        site_description:
+          type:
+            - string
+            - "null"
+        theme_color:
+          type: string
+          example: "#000000"
+        whatsapp_admin:
+          type:
+            - string
+            - "null"
+    HeroSection:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        groom_name:
+          type: string
+        bride_name:
+          type: string
+        event_date:
+          type: string
+          format: date
+        cover_image:
+          type:
+            - string
+            - "null"
+        background_music:
+          type:
+            - string
+            - "null"
+        opening_quote:
+          type:
+            - string
+            - "null"
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Couple:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum:
+            - groom
+            - bride
+        full_name:
+          type: string
+        nickname:
+          type:
+            - string
+            - "null"
+        child_order:
+          type:
+            - string
+            - "null"
+        father_name:
+          type:
+            - string
+            - "null"
+        mother_name:
+          type:
+            - string
+            - "null"
+        bio:
+          type:
+            - string
+            - "null"
+        photo:
+          type:
+            - string
+            - "null"
+        instagram:
+          type:
+            - string
+            - "null"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    EventSchedule:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        event_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          example: "09:00:00"
+        end_time:
+          type:
+            - string
+            - "null"
+          example: "12:00:00"
+        venue_name:
+          type: string
+        address:
+          type:
+            - string
+            - "null"
+        map_url:
+          type:
+            - string
+            - "null"
+        sort_order:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    LoveStory:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        story_date:
+          type:
+            - string
+            - "null"
+          format: date
+        description:
+          type:
+            - string
+            - "null"
+        photo:
+          type:
+            - string
+            - "null"
+        sort_order:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Gallery:
+      type: object
+      properties:
+        id:
+          type: integer
+        image:
+          type: string
+        caption:
+          type:
+            - string
+            - "null"
+        sort_order:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Gift:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum:
+            - bank
+            - ewallet
+            - address
+        provider_name:
+          type: string
+        account_number:
+          type:
+            - string
+            - "null"
+        account_name:
+          type:
+            - string
+            - "null"
+        note:
+          type:
+            - string
+            - "null"
+        logo:
+          type:
+            - string
+            - "null"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    RsvpRequest:
+      type: object
+      required:
+        - guest_name
+        - attendance
+      properties:
+        guest_name:
+          type: string
+          maxLength: 255
+        attendance:
+          type: string
+          enum:
+            - hadir
+            - tidak_hadir
+            - masih_ragu
+        total_guest:
+          type:
+            - integer
+            - "null"
+          minimum: 1
+          maximum: 10
+        message:
+          type:
+            - string
+            - "null"
+          maxLength: 1000
+    Rsvp:
+      allOf:
+        - $ref: "#/components/schemas/RsvpRequest"
+        - type: object
+          properties:
+            id:
+              type: integer
+            total_guest:
+              type: integer
+              example: 1
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    RsvpPaginator:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Rsvp"
+        first_page_url:
+          type:
+            - string
+            - "null"
+        from:
+          type:
+            - integer
+            - "null"
+        last_page:
+          type: integer
+        last_page_url:
+          type:
+            - string
+            - "null"
+        links:
+          type: array
+          items:
+            type: object
+        next_page_url:
+          type:
+            - string
+            - "null"
+        path:
+          type: string
+        per_page:
+          type: integer
+        prev_page_url:
+          type:
+            - string
+            - "null"
+        to:
+          type:
+            - integer
+            - "null"
+        total:
+          type: integer
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: The guest name field is required.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
