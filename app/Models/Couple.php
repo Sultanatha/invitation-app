@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\AssignsDefaultInvitation;
 use Illuminate\Database\Eloquent\Model;
 
 class Couple extends Model
 {
+    use AssignsDefaultInvitation;
+
     protected $fillable = [
+        'invitation_id',
         'role',
         'full_name',
         'nickname',

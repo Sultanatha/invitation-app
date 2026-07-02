@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gift;
+use App\Support\CurrentInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +21,7 @@ class GiftController extends Controller
 
     public function index(): View
     {
-        $gifts = Gift::latest()->get();
+        $gifts = CurrentInvitation::get()->gifts()->latest()->get();
         return view('admin.gifts.index', compact('gifts'));
     }
 
@@ -32,6 +33,7 @@ class GiftController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateData($request);
+        $data['invitation_id'] = CurrentInvitation::get()->id;
 
         if ($request->hasFile('logo')) {
             $data['logo'] = $request->file('logo')->store('gifts', 'public');

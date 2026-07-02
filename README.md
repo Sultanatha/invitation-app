@@ -7,7 +7,7 @@ Aplikasi undangan digital berbasis web yang dibangun dengan **Laravel 12**, dile
 ## 🚀 Fitur Utama
 
 - **Admin Dashboard** (Blade + Tailwind CSS) di `/admin`
-  - Manajemen Hero Section, Mempelai, Jadwal Acara, Cerita Cinta, Galeri, Hadiah, RSVP, dan Settings
+  - Manajemen Undangan, Hero Section, Mempelai, Jadwal Acara, Cerita Cinta, Galeri, Hadiah, RSVP, dan Settings
   - Manajemen User & Role berbasis RBAC
 - **REST API Publik** di `/api/v1/*` untuk dikonsumsi landing page (HTML statis, Vue, React, dll)
 - **RBAC** dengan Spatie Laravel Permission — role default: `super-admin` & `admin`
@@ -107,19 +107,54 @@ OpenAPI spec: `http://localhost:8000/openapi.yaml`
 
 | Method | Endpoint | Keterangan |
 |---|---|---|
-| GET | `/api/v1/invitation` | Semua data landing page (hero, couples, events, dll) |
+| GET | `/api/v1/invitation` | Semua data landing page untuk undangan default (hero, couples, events, dll) |
+| GET | `/api/v1/invitations/{slug}` | Semua data landing page untuk undangan tertentu |
 | GET | `/api/v1/invitation/hero` | Data hero section aktif |
 | GET | `/api/v1/invitation/couples` | Data mempelai |
 | GET | `/api/v1/invitation/events` | Jadwal acara |
 | GET | `/api/v1/invitation/love-stories` | Cerita cinta |
 | GET | `/api/v1/invitation/galleries` | Galeri foto |
 | GET | `/api/v1/invitation/gifts` | Info rekening / hadiah |
-| POST | `/api/v1/rsvp` | Submit RSVP tamu |
+| POST | `/api/v1/rsvp` | Submit RSVP tamu untuk undangan default |
+| POST | `/api/v1/invitations/{slug}/rsvp` | Submit RSVP tamu untuk undangan tertentu |
+
+## Halaman Publik Undangan
+
+Setiap undangan memiliki halaman publik berdasarkan slug:
+
+```text
+http://localhost:8000/{slug}
+```
+
+Contoh:
+
+```text
+http://localhost:8000/default
+http://localhost:8000/budi-siti
+```
+
+Alur admin:
+
+1. Login ke `/admin/login`.
+2. Buka menu **Undangan**.
+3. Tambah undangan baru dan isi judul, slug, template, dan status publik.
+4. Isi **Frontend URL** dengan domain FE utama jika halaman undangan memakai FE terpisah, misalnya `https://frontend-kamu.com`. Sistem akan menambahkan slug menjadi `https://frontend-kamu.com/{slug}`. Jika kosong, sistem memakai halaman lokal `/{slug}`.
+5. Klik **Kelola** pada undangan tersebut.
+6. Isi Hero, Mempelai, Jadwal Acara, Galeri, Hadiah, RSVP, dan Settings seperti biasa.
+7. Klik **Preview** atau buka `/{slug}`.
 
 **Contoh submit RSVP:**
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/rsvp \
+  -H "Content-Type: application/json" \
+  -d '{"guest_name":"Budi","attendance":"hadir","total_guest":2,"message":"Selamat ya!"}'
+```
+
+**Contoh submit RSVP untuk undangan tertentu:**
+
+```bash
+curl -X POST http://localhost:8000/api/v1/invitations/budi-siti/rsvp \
   -H "Content-Type: application/json" \
   -d '{"guest_name":"Budi","attendance":"hadir","total_guest":2,"message":"Selamat ya!"}'
 ```
@@ -163,6 +198,7 @@ invitation-app/
 ## 📝 Catatan Penting
 
 - Semua upload gambar disimpan di `storage/app/public` — pastikan sudah menjalankan `php artisan storage:link`.
+- Data konten undangan dipisahkan dengan `invitation_id`. Endpoint lama memakai undangan default, sedangkan endpoint `/api/v1/invitations/{slug}` mengambil data sesuai slug.
 - Untuk **produksi**: ganti Tailwind CDN dengan build asset via Vite, dan tambahkan rate-limiting pada endpoint `POST /api/v1/rsvp`.
 - Jika landing page dibuat terpisah (React/Vue/SPA), cukup consume endpoint API — tidak perlu autentikasi karena bersifat publik (read-only, kecuali RSVP).
 

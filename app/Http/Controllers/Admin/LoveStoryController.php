@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LoveStory;
+use App\Support\CurrentInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +21,7 @@ class LoveStoryController extends Controller
 
     public function index(): View
     {
-        $stories = LoveStory::orderBy('sort_order')->get();
+        $stories = CurrentInvitation::get()->loveStories()->orderBy('sort_order')->get();
         return view('admin.love-story.index', compact('stories'));
     }
 
@@ -32,6 +33,7 @@ class LoveStoryController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateData($request);
+        $data['invitation_id'] = CurrentInvitation::get()->id;
 
         if ($request->hasFile('photo')) {
             $data['photo'] = $request->file('photo')->store('love-story', 'public');

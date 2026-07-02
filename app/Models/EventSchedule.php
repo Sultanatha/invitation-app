@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\AssignsDefaultInvitation;
 use Illuminate\Database\Eloquent\Model;
 
 class EventSchedule extends Model
 {
+    use AssignsDefaultInvitation;
+
     protected $fillable = [
+        'invitation_id',
         'title',
         'event_date',
         'start_time',

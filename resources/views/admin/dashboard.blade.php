@@ -19,10 +19,23 @@
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wide text-blush">Ringkasan undangan</p>
-            <h2 class="mt-1 text-2xl font-bold text-ink">Kelola konten dan RSVP dari satu tempat</h2>
-            <p class="mt-2 max-w-2xl text-sm text-slate-500">Pantau status tamu, jadwal acara, galeri, dan modul utama undangan.</p>
+            <h2 class="mt-1 text-2xl font-bold text-ink">{{ $invitation->title }}</h2>
+            <p class="mt-2 max-w-2xl text-sm text-slate-500">
+                Dashboard ini menampilkan data untuk undangan <span class="font-semibold text-ink">/{{ $invitation->slug }}</span>.
+                Konten yang ditambahkan dari menu admin akan masuk ke undangan ini.
+            </p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <a href="{{ $invitation->public_url }}" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-blush px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">
+                <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M14 3h7v7h-2V6.4l-8.3 8.3-1.4-1.4L17.6 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>
+                Preview FE
+            </a>
+            @can('view-invitation')
+                <a href="{{ route('admin.invitations.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 4v10h16V8l-8 5L4 8Zm1.2-2 6.8 4.2L18.8 6H5.2Z"/></svg>
+                    Ganti Undangan
+                </a>
+            @endcan
             @can('view-rsvp')
                 <a href="{{ route('admin.rsvp.index') }}" class="inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-700">
                     <svg viewBox="0 0 24 24" class="h-4 w-4 fill-current"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-5 4V6a2 2 0 0 1 2-2Zm3 5v2h8V9H8Zm0 4v2h5v-2H8Z"/></svg>

@@ -6,11 +6,13 @@ use App\Http\Controllers\Admin\EventScheduleController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\GiftController;
 use App\Http\Controllers\Admin\HeroController;
+use App\Http\Controllers\Admin\InvitationController;
 use App\Http\Controllers\Admin\LoveStoryController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\RsvpController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\PublicInvitationController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +32,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+        Route::post('invitations/{invitation}/switch', [InvitationController::class, 'switch'])->name('invitations.switch');
+        Route::resource('invitations', InvitationController::class)->except(['show']);
+
         Route::resource('hero', HeroController::class)->except(['show']);
         Route::resource('couple', CoupleController::class)->except(['show']);
         Route::resource('events', EventScheduleController::class)->except(['show']);
@@ -48,3 +53,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('roles', RoleController::class)->except(['show']);
     });
 });
+
+Route::get('{invitation:slug}', [PublicInvitationController::class, 'show'])->name('public.invitation.show');

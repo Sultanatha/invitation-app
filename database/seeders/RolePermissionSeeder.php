@@ -16,6 +16,7 @@ class RolePermissionSeeder extends Seeder
 
         $modules = [
             'dashboard',
+            'invitation',
             'hero',
             'couple',
             'event',

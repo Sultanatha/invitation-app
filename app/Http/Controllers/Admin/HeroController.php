@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HeroSection;
+use App\Support\CurrentInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +21,7 @@ class HeroController extends Controller
 
     public function index(): View
     {
-        $heroes = HeroSection::latest()->paginate(10);
+        $heroes = CurrentInvitation::get()->heroSections()->latest()->paginate(10);
         return view('admin.hero.index', compact('heroes'));
     }
 
@@ -32,6 +33,7 @@ class HeroController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateData($request);
+        $data['invitation_id'] = CurrentInvitation::get()->id;
         $data['cover_image'] = $this->handleUpload($request, 'cover_image');
 
         HeroSection::create($data);

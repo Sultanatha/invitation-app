@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\AssignsDefaultInvitation;
 use Illuminate\Database\Eloquent\Model;
 
 class HeroSection extends Model
 {
+    use AssignsDefaultInvitation;
+
     protected $fillable = [
+        'invitation_id',
         'groom_name',
         'bride_name',
         'event_date',

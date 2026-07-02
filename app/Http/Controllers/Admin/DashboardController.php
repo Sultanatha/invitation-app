@@ -3,26 +3,26 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\EventSchedule;
-use App\Models\Gallery;
-use App\Models\Rsvp;
+use App\Support\CurrentInvitation;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
+        $invitation = CurrentInvitation::get();
+
         $stats = [
-            'total_rsvp' => Rsvp::count(),
-            'hadir' => Rsvp::where('attendance', 'hadir')->count(),
-            'tidak_hadir' => Rsvp::where('attendance', 'tidak_hadir')->count(),
-            'ragu' => Rsvp::where('attendance', 'masih_ragu')->count(),
-            'total_event' => EventSchedule::count(),
-            'total_gallery' => Gallery::count(),
+            'total_rsvp' => $invitation->rsvps()->count(),
+            'hadir' => $invitation->rsvps()->where('attendance', 'hadir')->count(),
+            'tidak_hadir' => $invitation->rsvps()->where('attendance', 'tidak_hadir')->count(),
+            'ragu' => $invitation->rsvps()->where('attendance', 'masih_ragu')->count(),
+            'total_event' => $invitation->eventSchedules()->count(),
+            'total_gallery' => $invitation->galleries()->count(),
         ];
 
-        $latestRsvp = Rsvp::latest()->limit(5)->get();
+        $latestRsvp = $invitation->rsvps()->latest()->limit(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'latestRsvp'));
+        return view('admin.dashboard', compact('invitation', 'stats', 'latestRsvp'));
     }
 }

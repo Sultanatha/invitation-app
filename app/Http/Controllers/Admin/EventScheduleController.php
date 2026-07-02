@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\EventSchedule;
+use App\Support\CurrentInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +21,7 @@ class EventScheduleController extends Controller
 
     public function index(): View
     {
-        $events = EventSchedule::orderBy('sort_order')->get();
+        $events = CurrentInvitation::get()->eventSchedules()->orderBy('sort_order')->get();
         return view('admin.events.index', compact('events'));
     }
 
@@ -31,7 +32,7 @@ class EventScheduleController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        EventSchedule::create($this->validateData($request));
+        EventSchedule::create($this->validateData($request) + ['invitation_id' => CurrentInvitation::get()->id]);
         return redirect()->route('admin.events.index')->with('success', 'Acara berhasil ditambahkan.');
     }
 

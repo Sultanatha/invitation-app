@@ -214,14 +214,16 @@ DB_CONNECTION=sqlite
 
 | Method | Endpoint | Keterangan |
 |---|---|---|
-| GET | `/api/v1/invitation` | Semua data landing page |
+| GET | `/api/v1/invitation` | Semua data landing page untuk undangan default |
+| GET | `/api/v1/invitations/{slug}` | Semua data landing page untuk undangan tertentu |
 | GET | `/api/v1/invitation/hero` | Hero section aktif |
 | GET | `/api/v1/invitation/couples` | Data mempelai |
 | GET | `/api/v1/invitation/events` | Jadwal acara |
 | GET | `/api/v1/invitation/love-stories` | Cerita cinta |
 | GET | `/api/v1/invitation/galleries` | Galeri foto |
 | GET | `/api/v1/invitation/gifts` | Info hadiah atau rekening |
-| POST | `/api/v1/rsvp` | Tamu submit RSVP |
+| POST | `/api/v1/rsvp` | Tamu submit RSVP untuk undangan default |
+| POST | `/api/v1/invitations/{slug}/rsvp` | Tamu submit RSVP untuk undangan tertentu |
 | GET | `/api/v1/rsvp` | List RSVP, membutuhkan auth Sanctum dan permission `view-rsvp` |
 
 Contoh submit RSVP:
@@ -374,6 +376,15 @@ Bagian ini mencatat perubahan yang sudah dilakukan pada project berjalan.
 ```php
 $middleware->redirectGuestsTo(fn () => route('admin.login'));
 ```
+
+### Multi invitation dasar
+
+- Menambahkan tabel `invitations` dengan `slug`, `title`, `template_key`, dan `is_active`.
+- Menambahkan `invitation_id` ke `settings`, `hero_sections`, `couples`, `event_schedules`, `love_stories`, `galleries`, `gifts`, dan `rsvps`.
+- Data lama dibackfill ke undangan default dengan slug `default`.
+- Endpoint lama `/api/v1/invitation` dan `/api/v1/rsvp` tetap memakai undangan default.
+- Endpoint baru `/api/v1/invitations/{slug}` dan `/api/v1/invitations/{slug}/rsvp` mengambil dan menyimpan data sesuai undangan.
+- Model konten otomatis memakai undangan default ketika `invitation_id` tidak dikirim, sehingga dashboard lama tetap bisa dipakai.
 
 ### Validasi yang sudah dilakukan
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Rsvp;
+use App\Support\CurrentInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -17,7 +18,7 @@ class RsvpController extends Controller
 
     public function index(): View
     {
-        $rsvps = Rsvp::latest()->paginate(15);
+        $rsvps = CurrentInvitation::get()->rsvps()->latest()->paginate(15);
         return view('admin.rsvp.index', compact('rsvps'));
     }
 

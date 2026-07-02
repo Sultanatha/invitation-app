@@ -3,17 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Couple;
-use App\Models\EventSchedule;
-use App\Models\Gallery;
-use App\Models\Gift;
-use App\Models\HeroSection;
-use App\Models\LoveStory;
+use App\Models\Invitation;
 use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Rsvp;
 
 class InvitationController extends Controller
 {
@@ -21,61 +14,78 @@ class InvitationController extends Controller
      * Endpoint utama: semua data landing page sekali fetch.
      * GET /api/invitation
      */
-    public function index(): JsonResponse
+    public function index(?Invitation $invitation = null): JsonResponse
     {
+        $invitation = $this->resolveInvitation($invitation);
+
         return response()->json([
             'success' => true,
             'data' => [
-                'settings' => $this->settings(),
-                'hero' => HeroSection::where('is_active', true)->latest()->first(),
-                'couples' => Couple::all(),
-                'events' => EventSchedule::orderBy('sort_order')->get(),
-                'love_stories' => LoveStory::orderBy('sort_order')->get(),
-                'galleries' => Gallery::orderBy('sort_order')->get(),
-                'gifts' => Gift::all(),
+                'invitation' => $invitation,
+                'settings' => $this->settings($invitation),
+                'hero' => $invitation->heroSections()->where('is_active', true)->latest()->first(),
+                'couples' => $invitation->couples()->get(),
+                'events' => $invitation->eventSchedules()->orderBy('sort_order')->get(),
+                'love_stories' => $invitation->loveStories()->orderBy('sort_order')->get(),
+                'galleries' => $invitation->galleries()->orderBy('sort_order')->get(),
+                'gifts' => $invitation->gifts()->get(),
             ],
         ]);
     }
 
-    public function hero(): JsonResponse
+    public function hero(?Invitation $invitation = null): JsonResponse
     {
+        $invitation = $this->resolveInvitation($invitation);
+
         return response()->json([
             'success' => true,
-            'data' => HeroSection::where('is_active', true)->latest()->first(),
+            'data' => $invitation->heroSections()->where('is_active', true)->latest()->first(),
         ]);
     }
 
-    public function couples(): JsonResponse
+    public function couples(?Invitation $invitation = null): JsonResponse
     {
-        return response()->json(['success' => true, 'data' => Couple::all()]);
+        $invitation = $this->resolveInvitation($invitation);
+
+        return response()->json(['success' => true, 'data' => $invitation->couples()->get()]);
     }
 
-    public function events(): JsonResponse
+    public function events(?Invitation $invitation = null): JsonResponse
     {
-        return response()->json(['success' => true, 'data' => EventSchedule::orderBy('sort_order')->get()]);
+        $invitation = $this->resolveInvitation($invitation);
+
+        return response()->json(['success' => true, 'data' => $invitation->eventSchedules()->orderBy('sort_order')->get()]);
     }
 
-    public function loveStories(): JsonResponse
+    public function loveStories(?Invitation $invitation = null): JsonResponse
     {
-        return response()->json(['success' => true, 'data' => LoveStory::orderBy('sort_order')->get()]);
+        $invitation = $this->resolveInvitation($invitation);
+
+        return response()->json(['success' => true, 'data' => $invitation->loveStories()->orderBy('sort_order')->get()]);
     }
 
-    public function galleries(): JsonResponse
+    public function galleries(?Invitation $invitation = null): JsonResponse
     {
-        return response()->json(['success' => true, 'data' => Gallery::orderBy('sort_order')->get()]);
+        $invitation = $this->resolveInvitation($invitation);
+
+        return response()->json(['success' => true, 'data' => $invitation->galleries()->orderBy('sort_order')->get()]);
     }
 
-    public function gifts(): JsonResponse
+    public function gifts(?Invitation $invitation = null): JsonResponse
     {
-        return response()->json(['success' => true, 'data' => Gift::all()]);
+        $invitation = $this->resolveInvitation($invitation);
+
+        return response()->json(['success' => true, 'data' => $invitation->gifts()->get()]);
     }
 
     /**
      * Tamu submit RSVP.
      * POST /api/rsvp
      */
-    public function storeRsvp(Request $request): JsonResponse
+    public function storeRsvp(Request $request, ?Invitation $invitation = null): JsonResponse
     {
+        $invitation = $this->resolveInvitation($invitation);
+
         $data = $request->validate([
             'guest_name' => ['required', 'string', 'max:255'],
             'attendance' => ['required', 'in:hadir,tidak_hadir,masih_ragu'],
@@ -83,7 +93,7 @@ class InvitationController extends Controller
             'message' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $rsvp = Rsvp::create($data);
+        $rsvp = $invitation->rsvps()->create($data);
 
         return response()->json([
             'success' => true,
@@ -94,19 +104,30 @@ class InvitationController extends Controller
 
     public function rsvpList(): JsonResponse
     {
+        $invitation = Invitation::default();
+
         return response()->json([
             'success' => true,
-            'data' => Rsvp::latest()->paginate(20),
+            'data' => $invitation->rsvps()->latest()->paginate(20),
         ]);
     }
 
-    private function settings(): array
+    private function settings(Invitation $invitation): array
     {
         return [
-            'site_title' => Setting::get('site_title', 'Undangan Pernikahan'),
-            'site_description' => Setting::get('site_description'),
-            'theme_color' => Setting::get('theme_color', '#000000'),
-            'whatsapp_admin' => Setting::get('whatsapp_admin'),
+            'site_title' => Setting::get('site_title', 'Undangan Pernikahan', $invitation),
+            'site_description' => Setting::get('site_description', null, $invitation),
+            'theme_color' => Setting::get('theme_color', '#000000', $invitation),
+            'whatsapp_admin' => Setting::get('whatsapp_admin', null, $invitation),
         ];
+    }
+
+    private function resolveInvitation(?Invitation $invitation): Invitation
+    {
+        if ($invitation?->exists) {
+            return $invitation;
+        }
+
+        return Invitation::default();
     }
 }

@@ -26,8 +26,10 @@
 </head>
 <body class="min-h-screen bg-mist text-slate-800 antialiased">
 @php
+    $currentInvitation = \App\Support\CurrentInvitation::get();
     $navItems = [
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'match' => 'admin.dashboard', 'permission' => null, 'icon' => 'M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-11h6V4h-6v5Z'],
+        ['label' => 'Undangan', 'route' => 'admin.invitations.index', 'match' => 'admin.invitations.*', 'permission' => 'view-invitation', 'icon' => 'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 4v10h16V8l-8 5L4 8Zm1.2-2 6.8 4.2L18.8 6H5.2Z'],
         ['label' => 'Hero Section', 'route' => 'admin.hero.index', 'match' => 'admin.hero.*', 'permission' => 'view-hero', 'icon' => 'M12 3 3 9l9 6 9-6-9-6Zm-7 9.2v4.6L12 21l7-4.2v-4.6l-7 4.2-7-4.2Z'],
         ['label' => 'Mempelai', 'route' => 'admin.couple.index', 'match' => 'admin.couple.*', 'permission' => 'view-couple', 'icon' => 'M7.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm9 0a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM2 20a5.5 5.5 0 0 1 11 0H2Zm9 0a5.5 5.5 0 0 1 11 0h-5.8a7.4 7.4 0 0 0-5.2-4.7V20Z'],
         ['label' => 'Jadwal Acara', 'route' => 'admin.events.index', 'match' => 'admin.events.*', 'permission' => 'view-event', 'icon' => 'M7 2v3H5a2 2 0 0 0-2 2v2h18V7a2 2 0 0 0-2-2h-2V2h-2v3H9V2H7Zm14 9H3v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8Z'],
@@ -72,6 +74,11 @@
         </div>
 
         <nav class="mt-8 space-y-1">
+            <div class="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Sedang dikelola</p>
+                <p class="mt-1 truncate text-sm font-bold text-ink">{{ $currentInvitation->title }}</p>
+                <a href="{{ $currentInvitation->public_url }}" target="_blank" class="mt-2 inline-flex text-xs font-semibold text-blush hover:text-ink">Lihat halaman publik</a>
+            </div>
             {!! $renderNav($navItems) !!}
         </nav>
 

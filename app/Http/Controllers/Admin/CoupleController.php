@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Couple;
+use App\Support\CurrentInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +21,7 @@ class CoupleController extends Controller
 
     public function index(): View
     {
-        $couples = Couple::orderBy('role')->get();
+        $couples = CurrentInvitation::get()->couples()->orderBy('role')->get();
         return view('admin.couple.index', compact('couples'));
     }
 
@@ -32,6 +33,7 @@ class CoupleController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateData($request);
+        $data['invitation_id'] = CurrentInvitation::get()->id;
 
         if ($request->hasFile('photo')) {
             $data['photo'] = $request->file('photo')->store('couple', 'public');

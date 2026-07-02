@@ -2,19 +2,31 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\AssignsDefaultInvitation;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    protected $fillable = ['key', 'value'];
+    use AssignsDefaultInvitation;
 
-    public static function get(string $key, $default = null)
+    protected $fillable = ['invitation_id', 'key', 'value'];
+
+    public static function get(string $key, $default = null, ?Invitation $invitation = null)
     {
-        return static::where('key', $key)->value('value') ?? $default;
+        $invitation ??= Invitation::default();
+
+        return static::where('invitation_id', $invitation->id)
+            ->where('key', $key)
+            ->value('value') ?? $default;
     }
 
-    public static function set(string $key, $value): void
+    public static function set(string $key, $value, ?Invitation $invitation = null): void
     {
-        static::updateOrCreate(['key' => $key], ['value' => $value]);
+        $invitation ??= Invitation::default();
+
+        static::updateOrCreate(
+            ['invitation_id' => $invitation->id, 'key' => $key],
+            ['value' => $value]
+        );
     }
 }

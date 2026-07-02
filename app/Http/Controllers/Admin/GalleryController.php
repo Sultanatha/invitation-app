@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gallery;
+use App\Support\CurrentInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +21,7 @@ class GalleryController extends Controller
 
     public function index(): View
     {
-        $galleries = Gallery::orderBy('sort_order')->get();
+        $galleries = CurrentInvitation::get()->galleries()->orderBy('sort_order')->get();
         return view('admin.gallery.index', compact('galleries'));
     }
 
@@ -38,6 +39,7 @@ class GalleryController extends Controller
         ]);
 
         Gallery::create([
+            'invitation_id' => CurrentInvitation::get()->id,
             'image' => $request->file('image')->store('gallery', 'public'),
             'caption' => $request->caption,
             'sort_order' => $request->sort_order ?? 0,

@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\AssignsDefaultInvitation;
 use Illuminate\Database\Eloquent\Model;
 
 class Gallery extends Model
 {
-    protected $fillable = ['image', 'caption', 'sort_order'];
+    use AssignsDefaultInvitation;
+
+    protected $fillable = ['invitation_id', 'image', 'caption', 'sort_order'];
 }
